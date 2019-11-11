@@ -16,7 +16,17 @@ public class Tokenizer {
         VERBS = new HashSet<>();
         DETERMINERS = new HashSet<>();
 
-        // TODO: define the different constants of our grammar
+        SYMBOLS.put('.', Token.STOP);
+        SYMBOLS.put(Scanner.EOF, Token.EOF);
+
+        VERBS.add("scares");
+        VERBS.add("hates");
+
+        NOUNS.add("cat");
+        NOUNS.add("mouse");
+
+        DETERMINERS.add("a");
+        DETERMINERS.add("the");
     }
 
     private Scanner scanner = null;
@@ -67,8 +77,32 @@ public class Tokenizer {
     }
 
     private Lexeme extractLexeme() throws IOException, TokenizerException {
-    	// TODO: implement the lexeme extraction algorithm
-        return null;
+    	consumeWhiteSpaces();
+
+        char ch = scanner.current();
+        if (SYMBOLS.containsKey(ch)) {
+            scanner.moveNext();
+            return new Lexeme(ch, SYMBOLS.get(ch));
+        } else if (Character.isLetter(ch)) {
+            StringBuilder builder = new StringBuilder();
+            while (Character.isLetter(scanner.current())) {
+                builder.append(scanner.current());
+                scanner.moveNext();
+            }
+            String value = builder.toString();
+
+            if (NOUNS.contains(value)) {
+                return new Lexeme(value, Token.NOUN);
+            } else if (VERBS.contains(value)) {
+                return new Lexeme(value, Token.VERB);
+            } else if (DETERMINERS.contains(value)) {
+                return new Lexeme(value, Token.DETERMINER);
+            } else {
+                throw new TokenizerException("Unknown token: " + value);
+            }
+        } else {
+            throw new TokenizerException("Unknown char: " + ch);
+        }
     }
 
 
